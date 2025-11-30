@@ -38,6 +38,17 @@ def initialize(
         sys.exit(1)
 
 @app.command()
+def monitor(ctx: typer.Context) -> None:
+    """Read from the test results table and send new alerts"""
+    try:
+        ext.monitor()
+    except Exception:
+        log.exception(
+            "monitor failed with uncaught exception, please report to maintainer"
+        )
+        sys.exit(1)
+
+@app.command()
 def monitor_report(ctx: typer.Context) -> None:
     """Generate report for elementary"""
     try:

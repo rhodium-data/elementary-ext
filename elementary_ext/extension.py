@@ -32,6 +32,7 @@ class elementary(ExtensionBase):
         self.dbt_profiles_dir = Path(
             os.getenv("ELEMENTARY_PROFILES_DIR", self.dbt_project_dir / "profiles")
         )
+        self.elementary_profile_target = os.getenv("ELEMENTARY_PROFILE_TARGET", None)
         self.config_dir_path = os.getenv("ELEMENTARY_CONFIG_DIR_PATH", None)
         self.dbt_ext_type = os.getenv("DBT_EXT_TYPE", "bigquery")
         self.file_path = Path(os.getenv("ELEMENTARY_FILE_PATH", "utilities/elementary/report.html"))
@@ -55,8 +56,6 @@ class elementary(ExtensionBase):
             os.getenv("ELEMENTARY_EXT_SKIP_PRE_INVOKE", "false").lower() == "true"
         )
         self.elementary_invoker = Invoker(self.elementary_bin, cwd=self.dbt_profiles_dir)
-
-
 
     def pre_invoke(self, invoke_name: str | None, *invoke_args: Any) -> None:
         """Pre-invoke hook.
@@ -137,8 +136,6 @@ class elementary(ExtensionBase):
             )
             sys.exit(err.returncode)
 
-
-
     def initialize(self, force: bool = False) -> None:
         """Initialize the extension.
         Args:
@@ -182,6 +179,37 @@ class elementary(ExtensionBase):
             dbt_profiles_dir=self.dbt_profiles_dir,
         )
 
+    def monitor(self) -> None:
+        """Read from the test results table and send new alerts
+
+        Args:
+            profiles-dir: Path to dbt profiles directory
+            slack-token: Slack token for channel
+            slack-channel-name: Name of the slack channel
+
+        """
+        command_name = "monitor"
+        try:
+            self.elementary_invoker.run_and_log(
+                "monitor",
+                f"--slack-token={self.slack_token}",
+                f"--slack-channel-name={self.slack_channel_name}",
+                f"--profiles-dir={self.dbt_profiles_dir}",
+                f"--profile-target={self.elementary_profile_target}", 
+            )
+        except subprocess.CalledProcessError as err:
+            log_subprocess_error(
+                f"elementary {command_name}", err, "elementary invocation failed"
+            )
+            sys.exit(err.returncode)
+
+        log.info(
+            f"elementary {command_name}",
+            slack_channel_name=self.slack_channel_name,
+            dbt_profiles_dir=self.dbt_profiles_dir,
+            elementary_profile_target=self.elementary_profile_target,
+        )
+
     def monitor_report(self) -> None:
         """Generates a report through the report.html parameter
 
@@ -220,14 +248,6 @@ class elementary(ExtensionBase):
 
         """
         command_name = "monitor send report"
-
-        log.info(
-            f"elementary {command_name}",
-            slack_token=self.slack_token,
-            slack_channel_name=self.slack_channel_name,
-            dbt_profiles_dir=self.dbt_profiles_dir,
-        )
-
         try:
             self.elementary_invoker.run_and_log(
                 "monitor",
@@ -244,7 +264,6 @@ class elementary(ExtensionBase):
 
         log.info(
             f"elementary {command_name}",
-            slack_token=self.slack_token,
             slack_channel_name=self.slack_channel_name,
             dbt_profiles_dir=self.dbt_profiles_dir,
         )
