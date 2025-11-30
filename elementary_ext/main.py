@@ -91,7 +91,7 @@ def invoke(ctx: typer.Context, command_args: List[str]) -> None:
 @app.command()
 def describe(
     output_format: DescribeFormat = typer.Option(
-        DescribeFormat.text, "--format", help="Output format"
+        DescribeFormat.text, help="Output format"
     )
 ) -> None:
     """Describe the available commands of this extension."""
