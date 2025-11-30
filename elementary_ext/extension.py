@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import os
 import shutil
-import pkgutil
 import subprocess
 import sys
 from pathlib import Path
@@ -46,7 +45,7 @@ class elementary(ExtensionBase):
         self.environment= os.getenv("ELEMENTARY_ENV", None)
         self.full_refresh_dbt_models= os.getenv("ELEMENTARY_FULL_REFRESH_DBT_MODELS", None)
 
-        
+
 
         self.dbt_profiles_dir = Path(
             os.getenv("ELEMENTARY_PROFILES_DIR", self.dbt_project_dir / "profiles")
@@ -109,7 +108,7 @@ class elementary(ExtensionBase):
                     log.info(f"Using config at `{self.config_dir_path}`...")
                 elif self.dbt_profiles_dir != "":
                     command_args = command_args + ("--profiles-dir=" + str(self.dbt_profiles_dir),)
-                    log.info(f"Using profile.yml at `{self.dbt_profiles_dir}`...")          
+                    log.info(f"Using profile.yml at `{self.dbt_profiles_dir}`...")
                 if self.days_back is not None:
                     command_args = command_args + ("--days-back=" + str(self.days_back),)
                     log.info(f"Using days_back `{self.days_back}`...")
@@ -128,7 +127,7 @@ class elementary(ExtensionBase):
                 if self.full_refresh_dbt_models is not None:
                     command_args = command_args + ("--full-refresh-dbt-package" + str(self.full_refresh_dbt_models),)
                     log.info(f"Using full_refresh_dbt_models `{self.environment}`...")
-                    
+
             self.elementary_invoker.run_and_log(command_name, *command_args)
         except subprocess.CalledProcessError as err:
             log_subprocess_error(
@@ -195,7 +194,7 @@ class elementary(ExtensionBase):
                 f"--slack-token={self.slack_token}",
                 f"--slack-channel-name={self.slack_channel_name}",
                 f"--profiles-dir={self.dbt_profiles_dir}",
-                f"--profile-target={self.elementary_profile_target}", 
+                f"--profile-target={self.elementary_profile_target}",
             )
         except subprocess.CalledProcessError as err:
             log_subprocess_error(
@@ -279,7 +278,16 @@ class elementary(ExtensionBase):
         return models.Describe(
             commands=[
                 models.ExtensionCommand(
-                    name="elementary_extension", description="extension commands"
+                    name="elementary_extension",
+                    description="extension commands",
+                    commands=[
+                        "describe",
+                        "initialize",
+                        "invoke",
+                        "monitor",
+                        "monitor-report",
+                        "monitor-send-report",
+                    ],
                 ),
                 models.InvokerCommand(
                     name="elementary_invoker", description="pass through invoker"
