@@ -27,7 +27,7 @@ app = typer.Typer(
 @app.command()
 def initialize(
     ctx: typer.Context,
-    force: bool = typer.Option(False, help="Force initialization (if supported)"),
+    force: bool = typer.Option(False, "--force", help="Force initialization (if supported)"),
 ) -> None:
     """Initialize the elementary plugin."""
     try:
@@ -91,7 +91,7 @@ def invoke(ctx: typer.Context, command_args: List[str]) -> None:
 @app.command()
 def describe(
     output_format: DescribeFormat = typer.Option(
-        DescribeFormat.text, help="Output format"
+        DescribeFormat.text, "--format", help="Output format"
     )
 ) -> None:
     """Describe the available commands of this extension."""
@@ -109,7 +109,7 @@ def main(
     ctx: typer.Context,
     log_level: str = typer.Option("INFO", envvar="LOG_LEVEL"),
     log_timestamps: bool = typer.Option(
-        False, envvar="LOG_TIMESTAMPS", help="Show timestamp in logs"
+        False, "--log-timestamps", envvar="LOG_TIMESTAMPS", help="Show timestamp in logs"
     ),
     log_levels: bool = typer.Option(
         False, "--log-levels", envvar="LOG_LEVELS", help="Show log levels"
